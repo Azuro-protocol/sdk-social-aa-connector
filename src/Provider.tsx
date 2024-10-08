@@ -8,13 +8,13 @@ import config from './config'
 
 type ProviderProps = {
   className?: string
-  options: Omit<AuthCoreModalOptions, 'erc4337'> /*& { gasMode: GasMode}*/
+  options: Omit<AuthCoreModalOptions, 'erc4337' | 'supportEIP6963'> /*& { gasMode: GasMode}*/
   children?: React.ReactNode
 }
 
 const Provider: React.FC<ProviderProps> = (props) => {
   const { children, options } = props
-  const { appId, clientKey, projectId } = options
+  const { appId, clientKey, projectId, customStyle } = options
 
   return (
     <AuthCoreContextProvider
@@ -24,7 +24,7 @@ const Provider: React.FC<ProviderProps> = (props) => {
         customStyle: {
           // must greater than 2147483646
           zIndex: 2147483650,
-          ...options.customStyle,
+          ...(customStyle || {}),
         },
         // it's important to use connector from this package for correct work of @azuro-org/sdk
         supportEIP6963: false,

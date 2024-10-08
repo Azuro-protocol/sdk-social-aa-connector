@@ -17,14 +17,10 @@ export default {
     compact: true,
   },
   external: [
-    /@apollo/,
     /@azuro-org/,
-    /graphql/,
     /react/,
     /viem/,
     /wagmi/,
-    /axios/,
-    /cookies-next/,
   ],
   plugins: [
     typescript({
