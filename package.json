@@ -1,0 +1,50 @@
+{
+  "name": "@azuro-org/sdk-social-aa-connector",
+  "version": "0.1.0",
+  "author": "Azuro",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "sideEffects": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Azuro-protocol/sdk-social-aa-connector.git"
+  },
+  "homepage": "https://github.com/Azuro-protocol/sdk-social-aa-connector#readme",
+  "scripts": {
+    "build": "rimraf dist && rollup -c",
+    "prepublishOnly": "npm run build",
+    "------------------  Lint --------------------------------------------------------------------------------": "",
+    "lint": "next lint && tsc --noEmit",
+    "lint-fix": "eslint ./src -c .eslintrc --fix --ext js,ts,tsx",
+    "lint-ts": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "viem": "^2.21.7",
+    "wagmi": "^2.12.11"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.1.2",
+    "@types/react": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "eslint": "^8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "rimraf": "^5.0.1",
+    "rollup": "^3.25.3",
+    "rollup-plugin-preserve-directives": "^0.2.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@particle-network/aa": "^2.0.2",
+    "@particle-network/authkit": "^2.0.5"
+  }
+}
