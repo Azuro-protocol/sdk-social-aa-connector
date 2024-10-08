@@ -11,7 +11,7 @@
   "exports": {
     ".": "./dist/index.js"
   },
-  "sideEffects": true,
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Azuro-protocol/sdk-social-aa-connector.git"
