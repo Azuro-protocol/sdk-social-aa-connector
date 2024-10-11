@@ -4,15 +4,13 @@ import { useEffect } from 'react'
 import { isSocialAuthType, getLatestAuthType, type SocialAuthType, particleAuth, AuthCoreEvent } from '@particle-network/auth-core'
 
 import { particleWagmiWallet } from './connectors'
-// import type { GasMode } from './config'
+import { WalletConfigParams } from './connectors/particleWagmiWallet'
 
 
 type FixSocialLoginProps = {
-  options: Pick<AuthCoreModalOptions, 'projectId' | 'clientKey' | 'appId'>
-  // & { gasMode: GasMode }
+  options: WalletConfigParams['options']
 }
 export default function FixSocialLogin({ options }: FixSocialLoginProps) {
-  // start: fix social auth login
   const { connect } = useConnect()
   const { connectionStatus } = useParticleConnect()
   const { disconnect } = useDisconnect()
@@ -32,7 +30,6 @@ export default function FixSocialLogin({ options }: FixSocialLoginProps) {
       particleAuth.off(AuthCoreEvent.ParticleAuthDisconnect, onDisconnect)
     }
   }, [ connect, connectionStatus, disconnect ])
-  // end: fix social auth login
 
   return null
 }

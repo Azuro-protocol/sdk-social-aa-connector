@@ -2,19 +2,19 @@ import React from 'react'
 import { AuthCoreContextProvider, type AuthCoreModalOptions } from '@particle-network/authkit'
 
 import FixSocialLogin from './FixSocialLogin'
-// import config, { type GasMode } from './config'
 import config from './config'
+import { WalletConfigParams } from './connectors/particleWagmiWallet'
 
 
 type ProviderProps = {
   className?: string
-  options: Omit<AuthCoreModalOptions, 'erc4337' | 'supportEIP6963'> /*& { gasMode: GasMode}*/
+  options: Omit<AuthCoreModalOptions, 'erc4337' | 'supportEIP6963'> & WalletConfigParams['options']
   children?: React.ReactNode
 }
 
 const Provider: React.FC<ProviderProps> = (props) => {
   const { children, options } = props
-  const { appId, clientKey, projectId, customStyle } = options
+  const { customStyle } = options
 
   return (
     <AuthCoreContextProvider
@@ -30,7 +30,7 @@ const Provider: React.FC<ProviderProps> = (props) => {
         supportEIP6963: false,
       }}
     >
-      <FixSocialLogin options={{ appId, clientKey, projectId }} />
+      <FixSocialLogin options={options} />
       {children}
     </AuthCoreContextProvider>
   )

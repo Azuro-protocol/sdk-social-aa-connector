@@ -1,11 +1,11 @@
-import { AAWrapProvider, SendTransactionMode, SmartAccount, type FeeQuotesResponse, SendTransactionEvent } from '@particle-network/aa'
+import { SendTransactionMode, SmartAccount, type FeeQuotesResponse, SendTransactionEvent } from '@particle-network/aa'
 import { type ConnectParam, type EIP1193Provider } from '@particle-network/auth-core'
 import type { EVMProvider } from '@particle-network/authkit'
 import { ChainNotConfiguredError, createConnector } from '@wagmi/core'
 import { type Address, getAddress, numberToHex, type ProviderRpcError, SwitchChainError, UserRejectedRequestError } from 'viem'
 
-// import pkgConfig, { type GasMode } from '../config'
 import pkgConfig from '../config'
+import { AAWrapProvider } from '../AAWrapProvider';
 
 
 type Provider = EIP1193Provider
@@ -16,12 +16,13 @@ type Properties = {
   getProvider(type?: 'clear'): Promise<EVMProvider>
 }
 
-type WalletConfigParams = {
+export type WalletConfigParams = {
   options: {
     projectId: string
     clientKey: string
     appId: string
-    // gasMode: GasMode
+    gasMode?: SendTransactionMode
+    enableSessions?: boolean
   }
   connectParam?: ConnectParam
 }
@@ -136,14 +137,18 @@ export default function particleWagmiWallet(params: WalletConfigParams) {
           return baseProvider
         }
 
+        const gasMode = params.options.gasMode ?? SendTransactionMode.Gasless
+
         if (!this._aaWrapProvider) {
           const smartAccount = this._getSmartAccount(baseProvider)
 
-          // const isGasless = params.options.gasMode === 'gasless'
-          const isGasless = true
-          this._aaWrapProvider = new AAWrapProvider(smartAccount, isGasless ? SendTransactionMode.Gasless : SendTransactionMode.UserSelect)
+          this._aaWrapProvider = new AAWrapProvider(
+            smartAccount, 
+            gasMode, 
+            params.options.enableSessions
+        )
 
-          if (!isGasless) {
+          if (gasMode === SendTransactionMode.UserSelect) {
             this._aaWrapProvider.on(SendTransactionEvent.Request, (feeQuotesResult: FeeQuotesResponse) => {
               console.log('=== feeQuotesResult', feeQuotesResult)
               // let the user select the pay gas ERC-20 token
