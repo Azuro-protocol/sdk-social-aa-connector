@@ -9,7 +9,9 @@ import {
   Transaction
 } from '@particle-network/aa'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
-import { hashMessage, Hex, maxUint256, parseUnits, type PrivateKeyAccount, toBytes } from 'viem'
+import { createPublicClient, hashMessage, Hex, http, maxUint256, parseUnits, type PrivateKeyAccount, toBytes } from 'viem'
+import { waitForTransactionReceipt } from 'viem/actions';
+import { polygonAmoy } from 'viem/chains';
 
 export enum SendTransactionMode {
     UserSelect = 0,
@@ -130,93 +132,105 @@ export class AAWrapProvider implements IEthereumProvider {
             await this.smartAccount.provider.request(payload);
             const address = await this.smartAccount.getAddress();
             return [address];
-        } else if (payload.method === 'eth_sendTransaction') {
-            if (!payload.params) {
-                return Promise.reject(new Error('send transaction param error'));
-            }
+        } 
+				else if (payload.method === 'eth_sendTransaction') {
+					if (!payload.params) {
+							return Promise.reject(new Error('send transaction param error'));
+					}
 
-            const txData = payload.params[0];
-            const feeQuotesResult = await this.smartAccount.getFeeQuotes(txData);
+					const txData = payload.params[0];
+					const feeQuotesResult = await this.smartAccount.getFeeQuotes(txData);
 
-            if (this.sendTxMode === SendTransactionMode.UserSelect) {
-              return new Promise((resolve, reject) => {
-                  this.events.removeAllListeners(SendTransactionEvent.Reject);
-                  this.events.removeAllListeners(SendTransactionEvent.Resolve);
-                  this.events.once(SendTransactionEvent.Resolve, async (params: ResolveTransactionParams) => {
-                      try {
-                          const sendParams = { ...params, tx: txData };
-                          const txHash = await this.smartAccount.sendTransaction(sendParams);
-                          resolve(txHash);
-                      } catch (error) {
-                          reject(error);
-                      }
-                  });
-                  this.events.once(SendTransactionEvent.Reject, reject);
-                  if (!feeQuotesResult.transactions) {
-                      feeQuotesResult.transactions = [txData];
-                  }
-                  this.events.emit(SendTransactionEvent.Request, feeQuotesResult);
-              });
-            }
-  
-						const paymaster = this.sendTxMode === SendTransactionMode.Gasless ? (
-							feeQuotesResult.verifyingPaymasterGasless || feeQuotesResult.verifyingPaymasterNative
-						) : (
-							feeQuotesResult.verifyingPaymasterNative
+					if (this.sendTxMode === SendTransactionMode.UserSelect) {
+						return new Promise((resolve, reject) => {
+								this.events.removeAllListeners(SendTransactionEvent.Reject);
+								this.events.removeAllListeners(SendTransactionEvent.Resolve);
+								this.events.once(SendTransactionEvent.Resolve, async (params: ResolveTransactionParams) => {
+										try {
+												const sendParams = { ...params, tx: txData };
+												const txHash = await this.smartAccount.sendTransaction(sendParams);
+												resolve(txHash);
+										} catch (error) {
+												reject(error);
+										}
+								});
+								this.events.once(SendTransactionEvent.Reject, reject);
+								if (!feeQuotesResult.transactions) {
+										feeQuotesResult.transactions = [txData];
+								}
+								this.events.emit(SendTransactionEvent.Request, feeQuotesResult);
+						});
+					}
+
+					const paymaster = this.sendTxMode === SendTransactionMode.Gasless ? (
+						feeQuotesResult.verifyingPaymasterGasless || feeQuotesResult.verifyingPaymasterNative
+					) : (
+						feeQuotesResult.verifyingPaymasterNative
+					)
+
+					const { userOp, userOpHash } = paymaster
+
+					if (this.enableSession) {
+						if (!this.sessions?.length) {
+							const address = await this.smartAccount.getAddress()
+
+							const sessionKey = await this.smartAccount.createSessions([{
+								validUntil: 0,
+								validAfter: 0,
+                                // TODO: it's for amoy, need object for every other chain
+								sessionValidationModule: "0x000006bC2eCdAe38113929293d241Cf252D91861",
+								sessionKeyDataInAbi: [
+									['address', 'address', 'uint256'],
+									[
+										this.sessionWallet!.address,
+										address,
+										parseUnits('1', 6).toString(),
+									],
+								],
+							}])
+
+							const sessionPaymaster = this.sendTxMode === SendTransactionMode.Gasless ? (
+								sessionKey.verifyingPaymasterGasless || sessionKey.verifyingPaymasterNative
+							) : (
+								sessionKey.verifyingPaymasterNative
+							)
+	
+							const hash = await this.smartAccount.sendTransaction({
+								tx: sessionKey.transactions as Transaction[],
+								userOp: sessionPaymaster.userOp,
+								userOpHash: sessionPaymaster.userOpHash,
+							}) as Hex
+
+							console.log(hash, 'hash');
+							
+                            // TODO: I suppose we need object <chainId, viem chain>
+							await waitForTransactionReceipt(createPublicClient({
+								chain: polygonAmoy,
+								transport: http()
+							}), {
+								hash,
+							})
+
+							localStorage.setItem('sessions', JSON.stringify(sessionKey.sessions))
+							this.sessions = sessionKey.sessions!
+						}
+
+						this.smartAccount.validateSession(this.sessions![0]!, this.sessions!)
+
+						const signature = await this.sessionWallet!.signMessage({
+							message: userOpHash
+						});
+
+						return this.smartAccount.sendSignedUserOperation(
+							{ ...userOp, signature },
+							{
+								targetSession: this.sessions![0]!,
+								sessions: this.sessions!,
+							}
 						)
+					}
 
-						const { userOp, userOpHash } = paymaster
-
-            if (this.enableSession) {
-              const address = await this.smartAccount.getAddress()
-  
-              if (!this.sessions?.length) {
-                const sessionKey = await this.smartAccount.createSessions([{
-                  validUntil: 0,
-                  validAfter: 0,
-                  sessionValidationModule: "0x65D17f08C3b261C3009372B18B9095D442937A2c",
-                  sessionKeyDataInAbi: [
-                    ['address', 'address', 'uint256'],
-                    [
-                      this.sessionWallet!.address,
-                      address,
-                      parseUnits('1', 6).toString(),
-                    ],
-                  ],
-                }])
-
-								const sessionPaymaster = this.sendTxMode === SendTransactionMode.Gasless ? (
-									sessionKey.verifyingPaymasterGasless || sessionKey.verifyingPaymasterNative
-								) : (
-									sessionKey.verifyingPaymasterNative
-								)
-		
-                await this.smartAccount.sendTransaction({
-                  tx: sessionKey.transactions as Transaction[],
-                  userOp: sessionPaymaster.userOp,
-                  userOpHash: sessionPaymaster.userOpHash,
-                })
-
-                localStorage.setItem('sessions', JSON.stringify(sessionKey.sessions))
-                this.sessions = sessionKey.sessions!
-              }
-
-              this.smartAccount.validateSession(this.sessions![0]!, this.sessions!)
-  
-              const signature = await this.sessionWallet!.signMessage({
-                message: userOpHash
-              });
-  
-              return this.smartAccount.sendSignedUserOperation(
-                { ...userOp, signature },
-                {
-                  targetSession: this.sessions![0]!,
-                  sessions: this.sessions!,
-                }
-              )
-            }
-
-            return this.smartAccount.sendUserOperation({ userOp, userOpHash });
+					return this.smartAccount.sendUserOperation({ userOp, userOpHash });
         }
 
         return this.smartAccount.provider.request(payload);
