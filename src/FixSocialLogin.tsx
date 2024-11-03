@@ -1,38 +1,26 @@
-import { useConnect, useDisconnect } from 'wagmi'
-import { useConnect as useParticleConnect, type AuthCoreModalOptions } from '@particle-network/authkit'
+import { useAccountEffect, useAccount } from 'wagmi'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { useSetActiveWallet } from '@privy-io/wagmi'
 import { useEffect } from 'react'
-import { isSocialAuthType, getLatestAuthType, type SocialAuthType, particleAuth, AuthCoreEvent } from '@particle-network/auth-core'
-
-import { particleWagmiWallet } from './connectors'
-// import type { GasMode } from './config'
 
 
-type FixSocialLoginProps = {
-  options: Pick<AuthCoreModalOptions, 'projectId' | 'clientKey' | 'appId'>
-  // & { gasMode: GasMode }
-}
-export default function FixSocialLogin({ options }: FixSocialLoginProps) {
-  // start: fix social auth login
-  const { connect } = useConnect()
-  const { connectionStatus } = useParticleConnect()
-  const { disconnect } = useDisconnect()
+export default function FixSocialLogin() {
+  const { ready, logout } = usePrivy()
+  const { address, isConnecting, isReconnecting } = useAccount()
+  const { wallets } = useWallets()
+  const { setActiveWallet } = useSetActiveWallet()
+
+  useAccountEffect({
+    onDisconnect: () => {
+      logout().catch(() => {})
+    },
+  })
 
   useEffect(() => {
-    if (connectionStatus === 'connected' && isSocialAuthType(getLatestAuthType())) {
-      connect({
-        connector: particleWagmiWallet({ options, connectParam: { socialType: getLatestAuthType() as SocialAuthType } }),
-      })
+    if (!address && !isConnecting && !isReconnecting && ready && wallets?.[0]) {
+      setActiveWallet(wallets[0])
     }
-    const onDisconnect = () => {
-      disconnect()
-    }
-    particleAuth.on(AuthCoreEvent.ParticleAuthDisconnect, onDisconnect)
-
-    return () => {
-      particleAuth.off(AuthCoreEvent.ParticleAuthDisconnect, onDisconnect)
-    }
-  }, [ connect, connectionStatus, disconnect ])
-  // end: fix social auth login
+  }, [ wallets, address, isConnecting, isReconnecting, ready ])
 
   return null
 }
