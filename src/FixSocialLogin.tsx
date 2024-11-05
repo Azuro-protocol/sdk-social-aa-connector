@@ -1,7 +1,7 @@
 import { useAccountEffect, useAccount } from 'wagmi'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useSetActiveWallet } from '@privy-io/wagmi'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 
 export default function FixSocialLogin() {
@@ -10,14 +10,21 @@ export default function FixSocialLogin() {
   const { wallets } = useWallets()
   const { setActiveWallet } = useSetActiveWallet()
 
+  const isProcessingLogoutRef = useRef<boolean>(false)
+
   useAccountEffect({
     onDisconnect: () => {
-      logout().catch(() => {})
+      isProcessingLogoutRef.current = true
+      logout()
+        .catch(() => {})
+        .finally(() => {
+          isProcessingLogoutRef.current = false
+        })
     },
   })
 
   useEffect(() => {
-    if (!address && !isConnecting && !isReconnecting && ready && wallets?.[0]) {
+    if (!address && !isConnecting && !isReconnecting && ready && wallets?.[0] && !isProcessingLogoutRef.current) {
       setActiveWallet(wallets[0])
     }
   }, [ wallets, address, isConnecting, isReconnecting, ready ])

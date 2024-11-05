@@ -17,6 +17,8 @@ type ProviderProps = {
   initialWagmiState?: State
 }
 
+const loginMethods: PrivyConfig['loginMethods'] = [ 'wallet', 'email', 'google', 'twitter', 'farcaster', 'discord', 'instagram' ]
+
 const Provider: React.FC<ProviderProps> = (props) => {
   const { children, appId, privyConfig, wagmiConfig, initialWagmiState } = props
   const { embeddedWallets, ...restConfig } = privyConfig
@@ -25,7 +27,7 @@ const Provider: React.FC<ProviderProps> = (props) => {
     <PrivyProvider
       appId={appId}
       config={{
-        // loginMethods: ['email', 'google', 'twitter', 'wallet', 'farcaster', 'discord', 'instagram' ],
+        loginMethods,
         ...restConfig,
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',

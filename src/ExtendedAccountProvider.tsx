@@ -1,8 +1,6 @@
-'use client'
-
 import React, { useContext, createContext, useMemo } from 'react'
-import { useAccount as useAccountBase } from 'wagmi'
 import type { Address } from 'viem'
+import { useAccount as useAccountBase } from 'wagmi'
 import { usePrivy } from '@privy-io/react-auth'
 
 export type ExtendedAccountContextValue = ReturnType<typeof useAccountBase> & { isAAWallet: boolean }

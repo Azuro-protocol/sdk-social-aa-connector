@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useContext, createContext } from 'react'
 import { useSmartWallets } from '@privy-io/react-auth/smart-wallets'
 
