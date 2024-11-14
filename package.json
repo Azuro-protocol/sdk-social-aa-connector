@@ -1,6 +1,6 @@
 {
   "name": "@azuro-org/sdk-social-aa-connector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Azuro",
   "type": "module",
   "main": "dist/index.js",
@@ -31,20 +31,21 @@
     "wagmi": "^2.12.11"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-typescript": "^12.1.1",
     "@types/react": "^18.3.12",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.31.0",
     "rimraf": "^5.0.10",
-    "rollup": "^3.29.5",
+    "rollup": "^4.26.0",
     "rollup-plugin-preserve-directives": "^0.4.0",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^1.92.6",
-    "@privy-io/wagmi": "^0.2.12"
+    "@privy-io/react-auth": "^1.94.1",
+    "@privy-io/wagmi": "^0.2.12",
+    "permissionless": "^0.2.17"
   }
 }
