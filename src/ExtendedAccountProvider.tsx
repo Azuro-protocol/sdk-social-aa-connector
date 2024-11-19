@@ -25,7 +25,7 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
       address: privy.user.smartWallet.address as Address,
       isAAWallet: true,
     }
-  }, [ account.address, privy?.user?.smartWallet?.address ])
+  }, [ account, account.address, privy?.user?.smartWallet?.address ])
 
   return (
     <ExtendedAccountContext.Provider value={additionalContext}>
