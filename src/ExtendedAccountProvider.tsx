@@ -3,7 +3,7 @@ import type { Address } from 'viem'
 import { useAccount as useAccountBase } from 'wagmi'
 import { usePrivy } from '@privy-io/react-auth'
 
-export type ExtendedAccountContextValue = ReturnType<typeof useAccountBase> & { isAAWallet: boolean }
+export type ExtendedAccountContextValue = ReturnType<typeof useAccountBase> & { isAAWallet: boolean, isReady: boolean }
 
 const ExtendedAccountContext = createContext<ExtendedAccountContextValue | null>(null)
 
@@ -17,15 +17,16 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
 
   const additionalContext = useMemo(() => {
     if (!account.address || privy?.user?.smartWallet?.smartWalletType !== 'safe') {
-      return { ...account, isAAWallet: false }
+      return { ...account, isAAWallet: false, isReady: privy.ready }
     }
 
     return {
       ...account,
       address: privy.user.smartWallet.address as Address,
       isAAWallet: true,
+      isReady: privy.ready
     }
-  }, [ account, account.address, privy?.user?.smartWallet?.address ])
+  }, [ account, account.address, privy?.user?.smartWallet?.address, privy.ready ])
 
   return (
     <ExtendedAccountContext.Provider value={additionalContext}>
