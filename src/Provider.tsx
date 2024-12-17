@@ -1,7 +1,7 @@
 import React from 'react'
 import { PrivyProvider, type PrivyClientConfig } from '@privy-io/react-auth'
 import { createConfig, WagmiProvider } from '@privy-io/wagmi'
-import { SmartWalletsProvider } from '@privy-io/react-auth/smart-wallets'
+import { SmartWalletsProvider, SmartWalletsProviderProps } from '@privy-io/react-auth/smart-wallets'
 import type { State } from 'wagmi'
 import FixSocialLogin from './FixSocialLogin'
 import { ExtendedAccountProvider } from 'src/ExtendedAccountProvider'
@@ -15,12 +15,13 @@ type ProviderProps = {
   privyConfig: PrivyConfig
   wagmiConfig: ReturnType<typeof createConfig>
   initialWagmiState?: State
+  paymasterContext?: NonNullable<SmartWalletsProviderProps['config']>['paymasterContext']
 }
 
 const loginMethods: PrivyConfig['loginMethods'] = [ 'wallet', 'email', 'google', 'twitter', 'farcaster', 'discord', 'instagram' ]
 
 const Provider: React.FC<ProviderProps> = (props) => {
-  const { children, appId, privyConfig, wagmiConfig, initialWagmiState } = props
+  const { children, appId, privyConfig, wagmiConfig, initialWagmiState, paymasterContext } = props
   const { embeddedWallets, ...restConfig } = privyConfig
 
   return (
@@ -38,7 +39,7 @@ const Provider: React.FC<ProviderProps> = (props) => {
         },
       }}
     >
-      <SmartWalletsProvider>
+      <SmartWalletsProvider config={{ paymasterContext }}>
         <WagmiProvider
           config={wagmiConfig}
           initialState={initialWagmiState}

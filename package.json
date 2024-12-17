@@ -1,6 +1,6 @@
 {
   "name": "@azuro-org/sdk-social-aa-connector",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "Azuro",
   "type": "module",
   "main": "dist/index.js",
@@ -26,7 +26,7 @@
     "lint-ts": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "^18.2.0",
+    "react": "^18 || ^19",
     "viem": "^2.21.7",
     "wagmi": "^2.12.11"
   },
@@ -44,8 +44,8 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^1.94.3",
-    "@privy-io/wagmi": "^0.2.12",
-    "permissionless": "^0.2.18"
+    "@privy-io/react-auth": "^1.97.0",
+    "@privy-io/wagmi": "^0.2.13",
+    "permissionless": "^0.2.23"
   }
 }
