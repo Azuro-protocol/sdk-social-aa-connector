@@ -1,35 +1,47 @@
-import { useAccountEffect, useAccount } from 'wagmi'
+import { useAccount, useAccountEffect } from 'wagmi'
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { useSetActiveWallet } from '@privy-io/wagmi'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 
 
 export default function FixSocialLogin() {
-  const { ready, authenticated, logout } = usePrivy()
-  const { address, isConnecting, isReconnecting } = useAccount()
-  const { wallets } = useWallets()
+  const { authenticated, logout, user } = usePrivy()
+  const { ready, wallets } = useWallets()
   const { setActiveWallet } = useSetActiveWallet()
+  const { address, isConnecting, isReconnecting } = useAccount()
 
-  const isProcessingLogoutRef = useRef<boolean>(false)
+  const [ isProcessing, setProcessing ] = useState<boolean>(false)
 
   useAccountEffect({
     onDisconnect: () => {
-      isProcessingLogoutRef.current = true
       if (authenticated) {
+        setProcessing(true)
+
         logout()
-          .catch(() => {})
           .finally(() => {
-            isProcessingLogoutRef.current = false
+            setProcessing(false)
           })
+          .catch(() => {})
       }
     },
   })
 
-  useMemo(() => {
-    if (!address && !isConnecting && !isReconnecting && ready && wallets?.[0] && !isProcessingLogoutRef.current) {
-      setActiveWallet(wallets[0])
+  useLayoutEffect(() => {
+    const wallet = wallets?.[0]
+
+    if (
+      wallet
+      && ready
+      && (!address || wallet.address.toLowerCase() !== address?.toLowerCase())
+      && !isProcessing
+      && !isConnecting
+      && !isReconnecting
+    ) {
+      setProcessing(true)
+      setActiveWallet(wallet)
+        .finally(() => setProcessing(false))
     }
-  }, [ wallets?.[0], address, isConnecting, isReconnecting, ready ])
+  }, [ wallets, address, isProcessing, isConnecting, isReconnecting, ready ])
 
   return null
 }

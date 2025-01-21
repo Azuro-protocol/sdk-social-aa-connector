@@ -17,7 +17,11 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
   const [hasReconnectionFired, setHasReconnectionFired] = useState(false)
 
   const additionalContext = useMemo(() => {
-    if (!account.address || privy?.user?.smartWallet?.smartWalletType !== 'safe') {
+    if (
+      !account.address
+      || privy?.user?.smartWallet?.smartWalletType !== 'safe'
+      || account.address.toLowerCase() !== privy?.user?.wallet?.address?.toLowerCase()
+    ) {
       // workaround for broken initial state from privy-io/wagmi
       if (!hasReconnectionFired && account.status === 'disconnected') {
         return {
@@ -43,7 +47,13 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
       isAAWallet: true,
       isReady: privy.ready
     }
-  }, [ account, account.address, privy?.user?.smartWallet?.address, privy.ready ])
+  }, [
+    account,
+    account.address,
+    privy.ready,
+    privy?.user?.wallet?.address,
+    privy?.user?.smartWallet?.address
+  ])
 
   // workaround for broken initial state from privy-io/wagmi
   useEffect(() => {
