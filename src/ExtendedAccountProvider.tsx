@@ -17,11 +17,10 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
   const [hasReconnectionFired, setHasReconnectionFired] = useState(false)
 
   const additionalContext = useMemo(() => {
-    if (
-      !account.address
-      || privy?.user?.smartWallet?.smartWalletType !== 'safe'
-      || account.address.toLowerCase() !== privy?.user?.wallet?.address?.toLowerCase()
-    ) {
+    const isSafe = privy.user?.smartWallet?.smartWalletType === 'safe'
+    const isAAWallet = Boolean(privy.user?.id)
+
+    if (!account.address || !isAAWallet) {
       // workaround for broken initial state from privy-io/wagmi
       if (!hasReconnectionFired && account.status === 'disconnected') {
         return {
@@ -29,30 +28,55 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
           status: 'reconnecting',
           isDisconnected: false,
           isReconnecting: true,
-          isAAWallet: false,
+          isAAWallet,
           isReady: false,
         } as const
       }
 
       return {
         ...account,
-        isAAWallet: false,
+        isAAWallet,
         isReady: privy.ready
       }
     }
 
+    const address = privy.user!.smartWallet?.address as Address
+
+    if (!isSafe || !address) {
+      console.error(
+        `Azuro AA SDK: Privy authorization without "Safe" smartWallet, only "Safe" is allowed. 
+        smartWalletType: ${privy.user?.smartWallet?.smartWalletType}`
+      )
+
+      return {
+        ...account,
+        status: 'connecting',
+        address: undefined,
+        addresses: [] as const,
+        isDisconnected: false,
+        isReconnecting: false,
+        isConnecting: true,
+        isConnected: false,
+        isAAWallet: true,
+        isReady: false,
+      } as const
+    }
+
+
     return {
       ...account,
-      address: privy.user.smartWallet.address as Address,
+      address,
+      addresses: [ address ] as const,
       isAAWallet: true,
       isReady: privy.ready
     }
   }, [
     account,
     account.address,
+    account.status,
     privy.ready,
-    privy?.user?.wallet?.address,
-    privy?.user?.smartWallet?.address
+    privy.user?.wallet?.address,
+    privy.user?.smartWallet?.address
   ])
 
   // workaround for broken initial state from privy-io/wagmi
