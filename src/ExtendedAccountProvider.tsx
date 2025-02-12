@@ -36,7 +36,7 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
       return {
         ...account,
         isAAWallet,
-        isReady: privy.ready
+        isReady: Boolean(account.address && !isAAWallet) || privy.ready,
       }
     }
 
@@ -92,7 +92,7 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
 
     const timer = setTimeout(() => {
       setHasReconnectionFired(true)
-    }, 7000)
+    }, 5000)
 
     return () => {
       clearTimeout(timer)
