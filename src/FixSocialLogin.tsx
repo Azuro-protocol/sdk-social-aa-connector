@@ -3,7 +3,7 @@ import { usePrivy } from '@privy-io/react-auth'
 
 
 export default function FixSocialLogin() {
-  const { authenticated, logout, user } = usePrivy()
+  const { authenticated, logout } = usePrivy()
 
   useAccountEffect({
     onDisconnect: () => {
