@@ -18,7 +18,7 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
 
   const additionalContext = useMemo(() => {
     const isSafe = privy.user?.smartWallet?.smartWalletType === 'safe'
-    const isAAWallet = Boolean(privy.user?.id)
+    const isAAWallet = privy.user?.wallet?.walletClientType === 'privy'
 
     if (!account.address || !isAAWallet) {
       // workaround for broken initial state from privy-io/wagmi
