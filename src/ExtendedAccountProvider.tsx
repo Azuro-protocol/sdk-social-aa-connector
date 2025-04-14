@@ -75,8 +75,10 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
     account.address,
     account.status,
     privy.ready,
-    privy.user?.wallet?.address,
-    privy.user?.smartWallet?.address
+    privy.user?.smartWallet?.address,
+    privy.user?.wallet?.walletClientType,
+    privy.user,
+    hasReconnectionFired,
   ])
 
   // workaround for broken initial state from privy-io/wagmi
