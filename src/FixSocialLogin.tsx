@@ -53,7 +53,7 @@ export default function FixSocialLogin() {
     if (
       authenticated && ready && (
         status === 'disconnected'
-        || (status === 'connected' && address.toLowerCase() !== wallet?.address?.toLowerCase())
+        || (status === 'connected' && address?.toLowerCase() !== wallet?.address?.toLowerCase())
       )
     ) {
       timerRef.current = setTimeout(() => {
