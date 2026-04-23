@@ -43,6 +43,7 @@ export default function FixSocialLogin() {
   })
 
   // Privy (at least v2.6.4) has a bug with re-login, it doesn't set re-connected wallet to wagmi state
+  // still actual in privy-io/wagmi@v4 + @privy-io/react-auth@v3
   useEffect(() => {
     if (!ready || isProcessing || (address && address.toLowerCase() === wallet?.address?.toLowerCase()) || !authenticated) {
       clearTimeout(timerRef.current)

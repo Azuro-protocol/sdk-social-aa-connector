@@ -5,6 +5,7 @@ import { SmartWalletsProvider, SmartWalletsProviderProps } from '@privy-io/react
 import type { State } from 'wagmi'
 import { ExtendedAccountProvider } from './ExtendedAccountProvider'
 import { AAWalletClientProvider } from './AAWalletClientProvider'
+import FixSocialLogin from './FixSocialLogin'
 
 export type PrivyConfig = PrivyClientConfig
 
@@ -45,6 +46,7 @@ const Provider: React.FC<ProviderProps> = (props) => {
           initialState={initialWagmiState}
           reconnectOnMount={false}
         >
+          <FixSocialLogin />
           <ExtendedAccountProvider>
             <AAWalletClientProvider>
               {children}
