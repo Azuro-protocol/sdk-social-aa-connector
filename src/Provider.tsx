@@ -3,9 +3,8 @@ import { PrivyProvider, type PrivyClientConfig } from '@privy-io/react-auth'
 import { createConfig, WagmiProvider } from '@privy-io/wagmi'
 import { SmartWalletsProvider, SmartWalletsProviderProps } from '@privy-io/react-auth/smart-wallets'
 import type { State } from 'wagmi'
-import FixSocialLogin from './FixSocialLogin'
-import { ExtendedAccountProvider } from 'src/ExtendedAccountProvider'
-import { AAWalletClientProvider } from 'src/AAWalletClientProvider'
+import { ExtendedAccountProvider } from './ExtendedAccountProvider'
+import { AAWalletClientProvider } from './AAWalletClientProvider'
 
 export type PrivyConfig = PrivyClientConfig
 
@@ -31,8 +30,9 @@ const Provider: React.FC<ProviderProps> = (props) => {
         loginMethods,
         ...restConfig,
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
-          requireUserPasswordOnCreate: false,
+          ethereum: {
+            createOnLogin: 'users-without-wallets'
+          },
           // waitForTransactionConfirmation: false,
           showWalletUIs: false,
           ...embeddedWallets || {},
@@ -45,7 +45,6 @@ const Provider: React.FC<ProviderProps> = (props) => {
           initialState={initialWagmiState}
           reconnectOnMount={false}
         >
-          <FixSocialLogin />
           <ExtendedAccountProvider>
             <AAWalletClientProvider>
               {children}

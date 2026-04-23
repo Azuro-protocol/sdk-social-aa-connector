@@ -1,9 +1,9 @@
 import React, { useContext, createContext, useMemo, useState, useEffect } from 'react'
 import type { Address } from 'viem'
-import { useAccount as useAccountBase } from 'wagmi'
+import { useConnection } from 'wagmi'
 import { usePrivy } from '@privy-io/react-auth'
 
-export type ExtendedAccountContextValue = ReturnType<typeof useAccountBase> & { isAAWallet: boolean, isReady: boolean }
+export type ExtendedAccountContextValue = ReturnType<typeof useConnection> & { isAAWallet: boolean, isReady: boolean }
 
 const ExtendedAccountContext = createContext<ExtendedAccountContextValue | null>(null)
 
@@ -12,7 +12,7 @@ export const useAccount = () => {
 }
 
 export const ExtendedAccountProvider = ({ children }: { children: React.ReactNode }) => {
-  const account = useAccountBase()
+  const account = useConnection()
   const privy = usePrivy()
   const [hasReconnectionFired, setHasReconnectionFired] = useState(false)
 
@@ -75,6 +75,9 @@ export const ExtendedAccountProvider = ({ children }: { children: React.ReactNod
     account.address,
     account.status,
     privy.ready,
+    privy.authenticated,
+    privy.user,
+    privy.user?.id,
     privy.user?.smartWallet?.address,
     privy.user?.wallet?.walletClientType,
     privy.user,
