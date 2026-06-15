@@ -1,6 +1,6 @@
 {
   "name": "@azuro-org/sdk-social-aa-connector",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": "Azuro",
   "type": "module",
   "main": "dist/index.js",
